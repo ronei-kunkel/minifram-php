@@ -6,25 +6,25 @@ use Minifram\Http\Request;
 
 class Router {
 
-  private static array $allowedMethods;
+  private static $allowedMethods = [];
 
-  private static array $allowedResources;
+  private static $allowedResources = [];
 
-  private static array $allowedResourcesActions;
+  private static $allowedResourcesActions = [];
 
-  private static array $allowedIdsInResources;
+  private static $allowedIdsInResources = [];
 
-  private static array $methods;
+  private static $methods = [];
 
-  private static array $routes;
+  private static $routes = [];
 
-  private static array $callbacks;
+  private static $callbacks = [];
 
-  private static array $authRoutes;
+  private static $authRoutes = [];
 
-  private static string $currentCallback;
+  private static $currentCallback = null;
 
-  private static int $currentRouteIndex;
+  private static $currentRouteIndex = null;
 
   // TODO: implement property called baseUri
 
@@ -138,7 +138,7 @@ class Router {
     if ($apiRouterType and $request->getHeaders()['Content-Type'] !== 'application/json')
       throw new \Exception("Content-Type it must be application/json!", 403);
 
-    if ($apiRouterType and in_array($request->method, ['PUT', 'POST']) and !isset($request->getHeaders()['Content-Length']))
+    if ($apiRouterType and in_array($request->getMethod(), ['PUT', 'POST']) and !isset($request->getHeaders()['Content-Length']))
       throw new \Exception("Content-Length header are missing", 411);
   }
 

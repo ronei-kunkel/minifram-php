@@ -4,23 +4,23 @@ namespace Minifram\Http;
 
 class Request {
 
-  private string $routesType;
+  private $routesType = null;
 
-  private array $uri;
+  private $uri = [];
 
-  private string $method;
+  private $method = null;
 
-  private string $resource;
+  private $resource = null;
 
-  private string $id;
+  private $id = null;
 
-  private string $action;
+  private $action = null;
 
-  private string $route;
+  private $route = null;
 
-  private string $body;
+  private $body = null;
 
-  private array $headers;
+  private $headers = [];
 
   public function __construct() {
     $this->routesType = $_REQUEST['routes'];
@@ -163,7 +163,7 @@ class Request {
     unset($requestUri['uri']);
 
     if(empty($uri)) $uri = [
-      0 => '/',
+      0 => '',
       1 => '',
       2 => ''
     ];
@@ -178,7 +178,7 @@ class Request {
     }
     // until here
 
-    $uri['resource'] = $uri[0] ?? '';
+    $uri['resource'] = $uri[0] ?? '/';
     $uri['id']       = $uri[1] ?? '';
     $uri['action']   = $uri[2] ?? '';
     unset($uri[0]);

@@ -8,7 +8,7 @@ class WebController extends Controller {
 
   public static function index(Request $request) {
     self::$request = $request;
-    
-    $request->sendResponse(['method' => __METHOD__]);
+
+    $request->sendResponse('<h1>Hello From Web Controller</h1>');
   }
 }

@@ -2,4 +2,7 @@
 
 namespace Minifram\View;
 
-class View {}
+class View {
+  // TODO: implement page rendering
+
+}

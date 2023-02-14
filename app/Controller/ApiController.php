@@ -3,12 +3,13 @@
 namespace Minifram\Controller;
 
 use Minifram\Http\Request;
+use Minifram\Http\Response;
 
 class ApiController extends Controller {
 
-  public static function api(Request $request) {
+  public static function check(Request $request) {
     self::$request = $request;
-    
-    $request->sendResponse(['method' => __METHOD__]);
+
+    (new Response($request))->return();
   }
 }

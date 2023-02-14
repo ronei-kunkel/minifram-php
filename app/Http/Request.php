@@ -4,7 +4,9 @@ namespace Minifram\Http;
 
 class Request {
 
-  private $routesType = null;
+  // TODO: validate xss attack
+
+  private $from = null;
 
   private $uri = [];
 
@@ -23,7 +25,7 @@ class Request {
   private $headers = [];
 
   public function __construct() {
-    $this->routesType = $_REQUEST['routes'];
+    $this->from = $_REQUEST['routes'];
 
     $this->padronizeUri();
 
@@ -35,25 +37,6 @@ class Request {
       ->setBody()
       ->setHeaders();
   }
-
-  // TODO: Extract to new class called Response
-  public function sendResponse($response, $httpCode = 200) {
-    $contentTypeHeader = 'text/html; charset=UTF-8';
-
-    if($this->routesType === 'api') $contentTypeHeader = 'application/json';
-
-    header('Content-Type: '.$contentTypeHeader, true);
-    header('HTTP/1.1 '.$httpCode);
-
-    if (!is_null($response)) {
-      $phpStdOut = fopen('php://output', 'w');
-      $response = ($this->routesType === 'api') ? json_encode($response) : $response;
-      fwrite($phpStdOut, $response);
-      fclose($phpStdOut);
-    }
-    exit;
-  }
-
 
   /**
    * Set Methods
@@ -106,8 +89,8 @@ class Request {
    */
 
   public function getBody() {
-    $body = json_decode($this->body, true);
-    if(!$body) $this->sendResponse(['error' => 'Invalid body'], 400);
+    $body = ($this->getFrom() === 'api') ? json_decode($this->body, true) : $this->body;
+    if(!$body) exit; (new Response($this))->return(['error' => 'Invalid body'], 400);
     return $body;
   }
 
@@ -115,8 +98,8 @@ class Request {
     return $this->headers;
   }
 
-  public function getRoutesType() {
-    return $this->routesType;
+  public function getFrom() {
+    return $this->from;
   }
 
   public function getMethod() {
@@ -163,7 +146,7 @@ class Request {
     unset($requestUri['uri']);
 
     if(empty($uri)) $uri = [
-      0 => '',
+      0 => '/',
       1 => '',
       2 => ''
     ];

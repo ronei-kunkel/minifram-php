@@ -2,4 +2,7 @@
 
 namespace Minifram\Model;
 
-class Model {}
+class Model {
+  // TODO: implement database connection
+
+}

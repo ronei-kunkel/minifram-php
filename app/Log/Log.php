@@ -2,4 +2,7 @@
 
 namespace Minifram\Log;
 
-class Log {}
+class Log {
+  // TODO: implement Logs
+
+}

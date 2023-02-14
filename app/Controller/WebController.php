@@ -3,12 +3,13 @@
 namespace Minifram\Controller;
 
 use Minifram\Http\Request;
+use Minifram\Http\Response;
 
 class WebController extends Controller {
 
   public static function index(Request $request) {
     self::$request = $request;
 
-    $request->sendResponse('<h1>Hello From Web Controller</h1>');
+    (new Response($request))->return('<h1>Hello From Web Controller</h1>');
   }
 }

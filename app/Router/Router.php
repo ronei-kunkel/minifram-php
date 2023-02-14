@@ -3,6 +3,7 @@
 namespace Minifram\Router;
 
 use Minifram\Http\Request;
+use Minifram\Http\Response;
 
 class Router {
 
@@ -80,7 +81,7 @@ class Router {
       call_user_func(self::$currentCallback, $request);
 
     } catch (\Exception $e) {
-      $request->sendResponse(['error' => $e->getMessage()], $e->getCode());
+      (new Response($request))->return(['error' => $e->getMessage()], $e->getCode());
     }
   }
 
@@ -114,31 +115,31 @@ class Router {
   }
 
   private static function validateCallback($request) {
-    $isApiRoute = $request->getRoutesType() === 'api';
+    $requestFromApi = $request->getFrom() === 'api';
 
-    $baseRoute = ($isApiRoute) ? '/api' : '';
+    $baseRoute = ($requestFromApi) ? '/api' : '';
 
     if (empty(self::$currentCallback))
-      throw new \Exception("Have no callback for route '". $baseRoute .self::$routes[self::$currentRouteIndex]."' with '".self::$methods[self::$currentRouteIndex]."' defined in '" . $request->getRoutesType() . "' routes file!", 500);
+      throw new \Exception("Have no callback for route '". $baseRoute .self::$routes[self::$currentRouteIndex]."' with '".self::$methods[self::$currentRouteIndex]."' defined in '" . $request->getFrom() . "' routes file!", 500);
 
     $callback = explode('::', self::$currentCallback);
 
     if (!class_exists($callback[0]))
-      throw new \Exception("Controller of callback for route '". $baseRoute .self::$routes[self::$currentRouteIndex]."' with '".self::$methods[self::$currentRouteIndex]."' defined in '" . $request->getRoutesType() . "' routes file doesn't exists!", 500);
+      throw new \Exception("Controller of callback for route '". $baseRoute .self::$routes[self::$currentRouteIndex]."' with '".self::$methods[self::$currentRouteIndex]."' defined in '" . $request->getFrom() . "' routes file doesn't exists!", 500);
 
     if (!method_exists($callback[0], $callback[1]))
-      throw new \Exception("Method of callback for route '". $baseRoute .self::$routes[self::$currentRouteIndex]."' with '".self::$methods[self::$currentRouteIndex]."' defined in '" . $request->getRoutesType() . "' routes file doesn't exists!", 500);
+      throw new \Exception("Method of callback for route '". $baseRoute .self::$routes[self::$currentRouteIndex]."' with '".self::$methods[self::$currentRouteIndex]."' defined in '" . $request->getFrom() . "' routes file doesn't exists!", 500);
   }
 
   private static function validateHeaders($request) {
-    $apiRouterType = $request->getRoutesType() === 'api';
-    if ($apiRouterType and !isset($request->getHeaders()['Content-Type']))
+    $requestFromApi = $request->getFrom() === 'api';
+    if ($requestFromApi and !isset($request->getHeaders()['Content-Type']))
       throw new \Exception("Content-Type header are missing", 403);
 
-    if ($apiRouterType and $request->getHeaders()['Content-Type'] !== 'application/json')
+    if ($requestFromApi and $request->getHeaders()['Content-Type'] !== 'application/json')
       throw new \Exception("Content-Type it must be application/json!", 403);
 
-    if ($apiRouterType and in_array($request->getMethod(), ['PUT', 'POST']) and !isset($request->getHeaders()['Content-Length']))
+    if ($requestFromApi and in_array($request->getMethod(), ['PUT', 'POST']) and !isset($request->getHeaders()['Content-Length']))
       throw new \Exception("Content-Length header are missing", 411);
   }
 
@@ -176,8 +177,8 @@ class Router {
     }
 
       // TODO: extract to new method called validateMethodCalledForRoute inside of getMatchedIndex
-    $isApiRoute = $request->getRoutesType() === 'api';
-    $baseRoute = ($isApiRoute) ? '/api' : '';
+    $requestFromApi = $request->getFrom() === 'api';
+    $baseRoute = ($requestFromApi) ? '/api' : '';
 
     if(!is_numeric($matchedIndex) or $matchedIndex < 0) 
       throw new \Exception("Method '".$request->getMethod()."' not allowed for route '" . $baseRoute . $request->getRoute() . "'!", 405);

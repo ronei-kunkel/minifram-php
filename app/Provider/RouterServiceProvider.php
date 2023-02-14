@@ -3,8 +3,16 @@
 namespace Minifram\Provider;
 
 use Minifram\Http\Request;
+use Minifram\Http\Response;
 
 class RouterServiceProvider {
+
+  /**
+   * Path to routes folder
+   *
+   * @var string
+   */
+  private static $routesPath = __DIR__ . '/../../routes/';
 
   /**
    * Include the specific file of routes according to nginx rule
@@ -18,9 +26,9 @@ class RouterServiceProvider {
    */
   public static function loadRoutes(Request $request) {
 
-    $routesFile = __DIR__ . '/../../routes/' . $request->getRoutesType() . '.php';
+    $routesFile = self::$routesPath . $request->getFrom() . '.php';
 
-    if (!file_exists($routesFile)) $request->sendResponse(null, 404);
+    if (!file_exists($routesFile)) (new Response($request))->return(['error' => ucfirst($request->getFrom()) .' routes are\'t enabled.'], 404);
 
     include_once $routesFile;
   }

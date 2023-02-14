@@ -28,7 +28,7 @@ class RouterServiceProvider {
 
     $routesFile = self::$routesPath . $request->getFrom() . '.php';
 
-    if (!file_exists($routesFile)) (new Response($request))->return(['error' => ucfirst($request->getFrom()) .' routes are\'t enabled.'], 404);
+    if (!file_exists($routesFile)) (new Response($request))->return(['error' => ucfirst($request->getFrom()) .' routes aren\'t enabled.'], 404);
 
     include_once $routesFile;
   }

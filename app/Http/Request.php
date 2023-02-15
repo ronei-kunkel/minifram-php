@@ -138,10 +138,15 @@ class Request {
   private function padronizeUri() {
     // TODO: extract to new method called convertUri
     $requestUri = $_REQUEST;
-    
+
     $uri = array_values(array_filter(explode('/', $requestUri['uri']), function($value) {
       return ($value !== null && $value !== false && $value !== '');
     }));
+
+    // to unable multisite coment this block
+    unset($uri[0]);
+    $uri = array_values($uri);
+    // --------------------------------------
 
     unset($requestUri['uri']);
 

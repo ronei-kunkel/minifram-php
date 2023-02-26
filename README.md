@@ -20,6 +20,6 @@ In current moment, the path of routes are able to only receive 3 levels. Well...
 
 You see? The first example have 3 levels in path 1: "user", 2: "1" and 3: "delete". This path works fine.
 
-But the second example have 4 levels in path 1: "user", 2: "1", 3: "followers", 4: "mutual". This path pobablly not work (has not been actively tested).
+But the second example have 4 levels in path 1: "user", 2: "1", 3: "followers", 4: "mutual". This path probablly not work (has not been actively tested).
 
 This behavior will be fixed in nexts updates to improve the development experience.

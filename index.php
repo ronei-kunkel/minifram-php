@@ -1,11 +1,14 @@
 <?php
 
-use Minifram\Http\Request;
-use Minifram\Provider\RouterServiceProvider;
-use Minifram\Router\Router;
+use Minifram\Provider\EnvServiceProvider;
 
-$request = new Request();
+require_once __DIR__.'/vendor/autoload.php';
 
-RouterServiceProvider::loadRoutes($request);
+EnvServiceProvider::load();
 
-Router::run($request);
+if (DEBUG or APP_ENV == 'dev') {
+  ini_set('error_reporting', E_ALL);
+  ini_set('display_errors', 1);
+}
+
+include_once __DIR__.'/bootstrap/app.php';

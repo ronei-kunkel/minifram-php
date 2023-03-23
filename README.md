@@ -10,6 +10,8 @@ docker-compose
 
 Composer update
 
+run `cp .env.example .env` and modify configurations
+
 ## Folder explain
 
 ## How to develop

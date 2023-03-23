@@ -24,7 +24,7 @@ class RouterServiceProvider {
    * @param Request $request
    * @return void
    */
-  public static function loadRoutes(Request $request) {
+  public static function load(Request $request) {
 
     $routesFile = self::$routesPath . $request->getFrom() . '.php';
 

@@ -136,7 +136,7 @@ class Request {
    */
 
    // TODO: refactor method after done inside TODOs
-  private function padronizeUri() { 
+  private function padronizeUri() {
     // TODO: extract to new method called convertUri
     $requestUri = $_REQUEST;
 

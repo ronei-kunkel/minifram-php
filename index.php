@@ -1,11 +1,5 @@
 <?php
 
-use Minifram\Http\Request;
-use Minifram\Provider\RouterServiceProvider;
-use Minifram\Router\Router;
+require_once __DIR__.'/vendor/autoload.php';
 
-$request = new Request();
-
-RouterServiceProvider::loadRoutes($request);
-
-Router::run($request);
+include_once __DIR__.'/bootstrap/app.php';

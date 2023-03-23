@@ -1,12 +1,13 @@
 <?php
 
-// TODO: implement DotEnv variables
-
 // set default timezone of system
-date_default_timezone_set('America/Sao_Paulo');
+date_default_timezone_set($_ENV['TIMEZONE'] ?? 'America/Sao_Paulo');
+
+// set default environment of application
+define('APP_ENV', $_ENV['APP_ENV'] ?? 'prod');
 
 // set false to increase security or true while develop
-const DEBUG = false;
+define('DEBUG', $_ENV['DEBUG'] ?? false);
 
 // set true to show what system receive and what system returned
-const DEBUG_REQUEST_RESPONSE = false;
+define('DEBUG_REQUEST_RESPONSE', $_ENV['DEBUG_REQUEST_RESPONSE'] ?? false);

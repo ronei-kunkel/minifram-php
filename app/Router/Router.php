@@ -27,7 +27,9 @@ class Router {
 
   private static $currentRouteIndex = null;
 
-  // TODO: implement property called baseUri
+  // TODO: implement property called baseRoute 
+
+  // TODO: implement method called setBaseRoute to verify if the request coming from api or web
 
 
   public static function get($route, $callback, $authRoute = false) {
@@ -51,6 +53,7 @@ class Router {
   }
 
   private static function create($method, $route, $callback, $authRoute) {
+    // TODO: implement validation to create only route and method not exists and if exists throw error
 
     self::setAllowedMethod($method);
     self::setAllowedResource($route);
@@ -65,8 +68,6 @@ class Router {
 
   public static function run(Request $request) {
     try {
-
-      // TODO: implement validation to create only route and method not exists and if exists throw error
 
       self::setCurrentCallback($request);
 
@@ -145,7 +146,7 @@ class Router {
 
   private static function validateAuthRequired($request) {
     if (self::$authRoutes[self::$currentRouteIndex] and !isset($request->getHeaders()['token']))
-      
+
       throw new \Exception('token header are missing', 401);
   }
 

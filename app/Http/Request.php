@@ -5,6 +5,7 @@ namespace Minifram\Http;
 class Request {
 
   // TODO: validate xss attack
+  // TODO: validade sqlInjection
 
   private $from = null;
 
@@ -143,10 +144,12 @@ class Request {
       return ($value !== null && $value !== false && $value !== '');
     }));
 
-    // to unable multisite coment this block
+      // TODO: transform this block in validation with CONSTANT to check if enable multisite in same infrastructure
+      // anything like $this->checkMultisite($uri);
+      // and the method recieve the variable with reference (&$uri)
     unset($uri[0]);
     $uri = array_values($uri);
-    // --------------------------------------
+      // until here
 
     unset($requestUri['uri']);
 

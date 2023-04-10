@@ -8,9 +8,17 @@ docker-compose
 
 ## How to set up
 
-Composer update
+### To install dependeces
 
-run `cp .env.example .env` and modify configurations
+run `composer update`
+
+### To create .env file
+
+run `composer env` and modify configurations
+
+## How to run tests
+
+run `composer test`
 
 ## Folder explain
 

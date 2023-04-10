@@ -6,22 +6,45 @@ use Psr\Http\Message\UriInterface;
 
 class Uri implements UriInterface
 {
-
   private string $scheme;
-  private string $user;
-  private string $host;
   private ?int   $port;
+  private string $userInfo;
+  private string $host;
+  private string $authority;
+  private string $path;
+  private string $query;
+  private string $fragment;
+
+  private const SCHEME_PORTS = [
+    'http'  => 80,
+    'https' => 443
+  ];
+
+  private const ALLOWED_SCHEMES = [
+    '',
+    'http',
+    'https',
+  ];
 
   public function __construct(string $uri)
   {
+    if (!filter_var($uri, FILTER_VALIDATE_URL)) throw new \Exception("Invalid URI");
 
-    $uriComponents = parse_url($uri);
+    $uri = parse_url($uri);
 
-    if (!is_array($uriComponents))
-      throw new \Exception("Error on parse the url", 500);
+    $this->setScheme($uri['scheme'] ?? '');
+    $this->setPort($uri['port'] ?? null);
+    $this->setUserInfo($uri['user'] ?? '', $uri['pass'] ?? '');
+    $this->setHost($uri['host'] ?? '');
+    $this->setAuthority();
+    $this->setPath($uri['path'] ?? '');
+    $this->setQuery($uri['query'] ?? '');
+    $this->setFragment($uri['fragment'] ?? '');
+  }
 
-    $this->scheme = $uriComponents['scheme'];
-    $this->host = $uriComponents['host'] ?? 'localhost';
+  private function setScheme(string $scheme): void
+  {
+    $this->scheme = empty($scheme) ? '' : strtolower($scheme);
   }
 
   /**
@@ -42,6 +65,16 @@ class Uri implements UriInterface
   }
 
   /**
+   * Set Authority of Uri
+   *
+   * @return void
+   */
+  private function setAuthority(): void
+  {
+    $this->authority = (empty($this->userInfo) ? '' : "$this->userInfo@") . $this->host . (is_null($this->port) ? '' : ":$this->port");
+  }
+
+  /**
    * Retrieve the authority component of the URI.
    *
    * If no authority information is present, this method MUST return an empty
@@ -59,6 +92,19 @@ class Uri implements UriInterface
    */
   public function getAuthority(): string
   {
+    return $this->authority;
+  }
+
+  /**
+   * Set UserInfo of Uri
+   *
+   * @param string $user
+   * @param string $pass
+   * @return void
+   */
+  private function setUserInfo(string $user, string $pass): void
+  {
+    $this->userInfo = (empty($user) ? '' : "$user") . (empty($pass) ? '' : ":$pass");
   }
 
   /**
@@ -75,8 +121,20 @@ class Uri implements UriInterface
    * NOT be added.
    * @return string The URI user information, in "username[:password]" format.
    */
-  public function getUserInfo()
+  public function getUserInfo(): string
   {
+    return $this->userInfo;
+  }
+
+  /**
+   * Set host of Uri
+   *
+   * @param string $host
+   * @return void
+   */
+  private function setHost(string $host): void
+  {
+    $this->host = empty($host) ? '' : strtolower($host);
   }
 
   /**
@@ -88,8 +146,36 @@ class Uri implements UriInterface
    * Section 3.2.2.
    * @return string The URI host.
    */
-  public function getHost()
+  public function getHost(): string
   {
+    return $this->host;
+  }
+
+  /**
+   * Set port of Uri
+   *
+   * @param integer|null $port
+   * @return void
+   */
+  private function setPort(?int $port): void
+  {
+    if(!is_numeric($port) or is_null($port)) {
+      $this->port = null;
+      return;
+    }
+
+    $havePort = (is_numeric($port) and !is_null($port));
+
+    $haveScheme = (strlen($this->scheme));
+
+    $isSchemeStandadPort = ($haveScheme and $havePort and $port === self::SCHEME_PORTS[$this->scheme]);
+
+    if($isSchemeStandadPort or (!$havePort and !$haveScheme) or (!$havePort and $haveScheme)) {
+      $this->port = null;
+      return;
+    }
+
+    $this->port = $port;
   }
 
   /**
@@ -104,12 +190,41 @@ class Uri implements UriInterface
    *
    * If no port is present, but a scheme is present, this method MAY return
    * the standard port for that scheme, but SHOULD return null.
-   * @return int|null The URI port.
+   * @return ?int The URI port.
    */
-  public function getPort(): int|null
+  public function getPort(): ?int
   {
+    return $this->port;
   }
 
+  /**
+   * Set Path of Uri
+   *
+   * @param string $path
+   * @return void
+   */
+  private function setPath(string $path): void
+  {
+    if(empty($path)) {
+      $this->path = '';
+      return;
+    }
+
+    $encodedPath = '';
+
+    $explodedPath = explode('/', $path);
+
+    foreach ($explodedPath as $keySegment => $segment) {
+      $encodedPath .= rawurlencode($segment);
+
+      if($keySegment == array_key_last($explodedPath)) continue;
+
+      $encodedPath .= '/';
+    }
+
+    $this->path = $encodedPath;
+  }
+  
   /**
    * Retrieve the path component of the URI.
    *
@@ -132,8 +247,24 @@ class Uri implements UriInterface
    * form (e.g., "%2F") to the instance.
    * @return string The URI path.
    */
-  public function getPath()
+  public function getPath(): string
   {
+    return $this->path;
+  }
+
+  /**
+   * Set Query of Uri
+   *
+   * @param string $query
+   * @return void
+   */
+  private function setQuery(string $query): void
+  {
+    if(empty($query)) {
+      $query = '';
+    }
+
+    $this->query = $query;
   }
 
   /**
@@ -153,8 +284,20 @@ class Uri implements UriInterface
    * that value MUST be passed in encoded form (e.g., "%26") to the instance.
    * @return string The URI query string.
    */
-  public function getQuery()
+  public function getQuery(): string
   {
+    return $this->query;
+  }
+
+  /**
+   * Set Fragment of Uri
+   *
+   * @param string $fragment
+   * @return void
+   */
+  private function setFragment(string $fragment): void
+  {
+    $this->fragment = $fragment;
   }
 
   /**
@@ -170,8 +313,9 @@ class Uri implements UriInterface
    * RFC 3986, Sections 2 and 3.5.
    * @return string The URI fragment.
    */
-  public function getFragment()
+  public function getFragment(): string
   {
+    return $this->fragment;
   }
 
   /**
@@ -188,8 +332,17 @@ class Uri implements UriInterface
    * @param string $scheme The scheme to use with the new instance.
    * @return UriInterface A new instance with the specified scheme.
    */
-  public function withScheme($scheme)
+  public function withScheme($scheme = ''): UriInterface
   {
+    $scheme = strtolower($scheme);
+
+    if(!in_array($scheme, self::ALLOWED_SCHEMES)) throw new \Exception("Unsupported scheme, must be 'http', 'https' or empty", 1);
+
+    $uri = clone $this;
+
+    $uri->scheme = $scheme;
+
+    return $uri;
   }
 
   /**
@@ -206,8 +359,20 @@ class Uri implements UriInterface
    * @param string|null $password The password associated with $user.
    * @return UriInterface A new instance with the specified user information.
    */
-  public function withUserInfo($user, $password = null)
+  public function withUserInfo($user, $password = null): UriInterface
   {
+    $uri = clone $this;
+
+    if(is_null($password)) $password = '';
+
+    if(empty($user)) {
+      $user = '';
+      $password = '';
+    }
+
+    $uri->setUserInfo($user, $password);
+
+    return $uri;
   }
 
   /**
@@ -221,8 +386,15 @@ class Uri implements UriInterface
    * @param string $host The hostname to use with the new instance.
    * @return UriInterface A new instance with the specified host.
    */
-  public function withHost($host)
+  public function withHost($host): UriInterface
   {
+    $uri = clone $this;
+
+    if(empty($host)) $host = '';
+
+    $uri->setHost($host);
+
+    return $uri;
   }
 
   /**
@@ -241,8 +413,13 @@ class Uri implements UriInterface
    *                       removes the port information.
    * @return UriInterface A new instance with the specified port.
    */
-  public function withPort($port)
+  public function withPort($port): UriInterface
   {
+    $uri = clone $this;
+
+    $uri->setPort($port);
+
+    return $uri;
   }
 
   /**
@@ -266,8 +443,17 @@ class Uri implements UriInterface
    * @param string $path The path to use with the new instance.
    * @return UriInterface A new instance with the specified path.
    */
-  public function withPath($path)
+  public function withPath($path): UriInterface
   {
+    $uri = clone $this;
+
+    $startWithSlash = (substr($path, 0, 1) === '/');
+
+    if(!$startWithSlash) $path = '/'.$path;
+
+    $uri->setPath($path);
+
+    return $uri;
   }
 
   /**
@@ -284,8 +470,13 @@ class Uri implements UriInterface
    * @param string $query The query string to use with the new instance.
    * @return UriInterface A new instance with the specified query string.
    */
-  public function withQuery($query)
+  public function withQuery($query): UriInterface
   {
+    $uri = clone $this;
+
+    $uri->setQuery($query);
+
+    return $uri;
   }
 
   /**
@@ -302,8 +493,13 @@ class Uri implements UriInterface
    * @param string $fragment The fragment to use with the new instance.
    * @return UriInterface A new instance with the specified fragment.
    */
-  public function withFragment($fragment)
+  public function withFragment($fragment): UriInterface
   {
+    $uri = clone $this;
+
+    $uri->setFragment($fragment);
+
+    return $uri;
   }
 
   /**
@@ -327,7 +523,14 @@ class Uri implements UriInterface
    * - If a fragment is present, it MUST be prefixed by "#".
    * @return string
    */
-  public function __toString()
+  public function __toString(): string
   {
+    $uri = empty($this->scheme) ? '' : $this->scheme . ':';
+    $uri .= empty($this->authority) ? '' : '//' . $this->authority;
+    $uri .= empty($this->path) ? '' : $this->path;
+    $uri .= empty($this->query) ? '' : '?' . $this->query;
+    $uri .= empty($this->fragment) ? '' : '#' . $this->fragment;
+
+    return $uri;
   }
 }
